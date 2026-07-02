@@ -10,6 +10,8 @@ router.post("/", async (req, res) => {
 
     try {
 
+        console.time("Total Request");
+
         console.log("1. Request received");
 
         const { conversationId, message } = req.body;
@@ -45,7 +47,11 @@ router.post("/", async (req, res) => {
 
         console.log("3. Saved to Firestore");
 
+        console.time("Gemini");
+
         const response = await reflect(message);
+
+        console.timeEnd("Gemini");
 
         await db
             .collection("conversations")
@@ -58,6 +64,8 @@ router.post("/", async (req, res) => {
             });
 
         console.log("4. Gemini replied");
+
+        console.timeEnd("Total Request");
 
         res.json({
             conversationId: currentConversationId,
