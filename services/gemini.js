@@ -24,10 +24,14 @@ User Reflection:
 ${reflection}
 `;
 
+    const start = Date.now();
+
     const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
         contents: prompt,
     });
+
+    console.log("Gemini API:", Date.now() - start, "ms");
 
     return response.text;
 }
