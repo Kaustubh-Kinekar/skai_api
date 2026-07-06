@@ -26,6 +26,8 @@ try{
                 updatedAt: new Date(),
             });
 
+            console.log("Conversations created:", conversationRef.id)
+
             currentConversationId = conversationRef.id;
         }
 
