@@ -72,7 +72,12 @@ async function reflect(
     });
 
     console.log(response.text);
-    const result = JSON.parse(response.text);
+    const cleaned = response.text
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
+
+    const result = JSON.parse(cleaned);
 
     return result;
 }
