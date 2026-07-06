@@ -29,13 +29,6 @@ try{
             currentConversationId = conversationRef.id;
         }
 
-        await db.collection("conversations")
-            .doc(currentConversationId)
-            .update({
-                title: result.title,
-                updatedAt: new Date(),
-            });
-
         const result = await reflect(
             message,
             isNewConversation,
@@ -46,7 +39,7 @@ try{
         if (isNewConversation) {
             await db.collection("conversations")
                 .doc(currentConversationId)
-                .set({
+                .update({
                     title: result.title,
                     createdAt: new Date(),
                     updatedAt: new Date(),
