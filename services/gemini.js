@@ -71,6 +71,7 @@ async function reflect(
         contents: prompt,
     });
 
+    console.log(response.text);
     const result = JSON.parse(response.text);
 
     return result;
