@@ -7,27 +7,21 @@ const express = require("express");
 const router = express.Router();
 
 router.post("/", async (req, res) => {
+console.log("🚀 NEW REFLECT ROUTE");
 
-    try {
-
-        console.time("Total Request");
-
-        console.log("1. Request received");
-
-        const { conversationId, message } = req.body;
+try{
+        const { conversationId, userId, message } = req.body;
 
         let currentConversationId = conversationId;
 
         console.log("2. Message:", message);
 
-        //await db.collection("test").add({
-        //    message: message,
-        //    createdAt: new Date(),
-        //});
+        const isNewConversation = !currentConversationId;
 
         if (!currentConversationId) {
 
             const conversationRef = await db.collection("conversations").add({
+                userId,
                 createdAt: new Date(),
                 updatedAt: new Date(),
             });
@@ -35,23 +29,35 @@ router.post("/", async (req, res) => {
             currentConversationId = conversationRef.id;
         }
 
-        await db
-            .collection("conversations")
+        await db.collection("conversations")
             .doc(currentConversationId)
-            .collection("messages")
-            .add({
-                role: "user",
-                content: message,
-                createdAt: new Date(),
+            .update({
+                title: result.title,
+                updatedAt: new Date(),
             });
 
-        console.log("3. Saved to Firestore");
+        const result = await reflect(
+            message,
+            isNewConversation,
+        );
 
-        console.time("Gemini");
+        console.log(result);
 
-        const response = await reflect(message);
-
-        console.timeEnd("Gemini");
+        if (isNewConversation) {
+            await db.collection("conversations")
+                .doc(currentConversationId)
+                .set({
+                    title: result.title,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                });
+        } else {
+            await db.collection("conversations")
+                .doc(currentConversationId)
+                .update({
+                    updatedAt: new Date(),
+                });
+        }
 
         await db
             .collection("conversations")
@@ -59,28 +65,25 @@ router.post("/", async (req, res) => {
             .collection("messages")
             .add({
                 role: "skai",
-                content: response,
+                content: result.response,
                 createdAt: new Date(),
             });
 
-        console.log("4. Gemini replied");
-
-        console.timeEnd("Total Request");
-
         res.json({
             conversationId: currentConversationId,
-            response,
+            title: isNewConversation ? result.title : null,
+            response: result.response,
         });
 
-    } catch (error) {
+        } catch (error) {
 
-        console.error(error);
+                console.error(error);
 
-        res.status(500).json({
-            error: "Something went wrong.",
-        });
+                res.status(500).json({
+                    error: "Something went wrong.",
+                });
 
-    }
+            }
 
 });
 

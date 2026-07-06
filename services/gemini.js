@@ -4,25 +4,65 @@ const ai = new GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY,
 });
 
-async function reflect(reflection) {
+async function reflect(
+    reflection,
+    isNewConversation,
+) {
 
-    const prompt = `
-You are Skai.
+    let prompt;
 
-            You listen more than you talk.
+    if (isNewConversation) {
+        prompt = `
+    You are Skai.
 
-            Do not give advice.
+    You listen more than you talk.
 
-            Do not act like a therapist.
+    Do not give advice.
+    Do not act like a therapist.
+    Do not diagnose.
 
-            Reply in 1-2 thoughtful sentences.
+    Write a short title (3-6 words) that captures the user's reflection.
 
-            End with a reflective question.
+    Then write a thoughtful response in 1-2 sentences.
 
-User Reflection:
+    End with one reflective question.
 
-${reflection}
-`;
+    Return ONLY valid JSON.
+
+    {
+      "title": "...",
+      "response": "..."
+    }
+
+    User Reflection:
+
+    ${reflection}
+    `;
+    } else {
+        prompt = `
+    You are Skai.
+
+    You listen more than you talk.
+
+    Do not give advice.
+    Do not act like a therapist.
+    Do not diagnose.
+
+    Reply in 1-2 thoughtful sentences.
+
+    End with one reflective question.
+
+    Return ONLY valid JSON.
+
+    {
+      "response": "..."
+    }
+
+    User Reflection:
+
+    ${reflection}
+    `;
+    }
 
     const start = Date.now();
 
@@ -31,9 +71,9 @@ ${reflection}
         contents: prompt,
     });
 
-    console.log("Gemini API:", Date.now() - start, "ms");
+    const result = JSON.parse(response.text);
 
-    return response.text;
+    return result;
 }
 
 module.exports = {
