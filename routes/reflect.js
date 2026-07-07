@@ -59,6 +59,16 @@ try{
             .doc(currentConversationId)
             .collection("messages")
             .add({
+                role: "user",
+                content: message,
+                createdAt: new Date(),
+            });
+
+        await db
+            .collection("conversations")
+            .doc(currentConversationId)
+            .collection("messages")
+            .add({
                 role: "skai",
                 content: result.response,
                 createdAt: new Date(),
