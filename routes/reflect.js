@@ -81,9 +81,7 @@ try{
         });
 
         } catch (error) {
-
                 console.error(error);
-
                 res.status(500).json({
                     error: "Something went wrong.",
                 });
@@ -91,19 +89,20 @@ try{
 });
 router.post("/saveGuestConversation", async (req, res) => {
     try {
-
         const { userId, messages } = req.body;
-
         console.log("Saving guest conversation...");
-
+        const conversationRef = await db.collection("conversations").add({
+            userId,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        });
+        const currentConversationId = conversationRef.id;
+        console.log("Conversation created:", currentConversationId);
     } catch (error) {
-
         console.error(error);
-
         res.status(500).json({
             error: "Something went wrong.",
         });
-
     }
 });
 module.exports = router;
