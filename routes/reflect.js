@@ -109,11 +109,11 @@ router.post("/saveGuestConversation", async (req, res) => {
                     createdAt: new Date(),
                 });
         }
+        res.json({
+                conversationId: currentConversationId,
+            });
     }
-    res.json({
-        conversationId: currentConversationId,
-    });
-    catch (error) {
+        catch (error) {
         console.error(error);
         res.status(500).json({
             error: "Something went wrong.",
