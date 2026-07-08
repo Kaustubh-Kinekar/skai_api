@@ -91,8 +91,16 @@ router.post("/saveGuestConversation", async (req, res) => {
     try {
         const { userId, messages } = req.body;
         console.log("Saving guest conversation...");
+        const firstUserMessage = messages.find(
+            (message) => message.role === "user"
+        );
+        const result = await reflect(
+            firstUserMessage.content,
+            true,
+        );
         const conversationRef = await db.collection("conversations").add({
             userId,
+            title: result.title,
             createdAt: new Date(),
             updatedAt: new Date(),
         });
