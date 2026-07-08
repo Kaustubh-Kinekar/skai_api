@@ -98,7 +98,22 @@ router.post("/saveGuestConversation", async (req, res) => {
         });
         const currentConversationId = conversationRef.id;
         console.log("Conversation created:", currentConversationId);
-    } catch (error) {
+        for (const message of messages) {
+            await db
+                .collection("conversations")
+                .doc(currentConversationId)
+                .collection("messages")
+                .add({
+                    role: message.role,
+                    content: message.content,
+                    createdAt: new Date(),
+                });
+        }
+    }
+    res.json({
+        conversationId: currentConversationId,
+    });
+    catch (error) {
         console.error(error);
         res.status(500).json({
             error: "Something went wrong.",
