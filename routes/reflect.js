@@ -14,8 +14,6 @@ try{
 
         let currentConversationId = conversationId;
 
-        console.log("2. Message:", message);
-
         const isNewConversation = !currentConversationId;
 
         if (!currentConversationId) {
@@ -25,8 +23,6 @@ try{
                 createdAt: new Date(),
                 updatedAt: new Date(),
             });
-
-            console.log("Conversations created:", conversationRef.id)
 
             currentConversationId = conversationRef.id;
         }
@@ -87,45 +83,34 @@ try{
                 });
         }
 });
-router.post("/saveGuestConversation", async (req, res) => {
+
+router.post("/claimConversation", async (req, res) => {
+
     try {
-        const { userId, messages } = req.body;
-        console.log("Saving guest conversation...");
-        const firstUserMessage = messages.find(
-            (message) => message.role === "user"
-        );
-        const result = await reflect(
-            firstUserMessage.content,
-            true,
-        );
-        const conversationRef = await db.collection("conversations").add({
-            userId,
-            title: result.title,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        });
-        const currentConversationId = conversationRef.id;
-        console.log("Conversation created:", currentConversationId);
-        for (const message of messages) {
-            await db
-                .collection("conversations")
-                .doc(currentConversationId)
-                .collection("messages")
-                .add({
-                    role: message.role,
-                    content: message.content,
-                    createdAt: new Date(),
-                });
-        }
-        res.json({
-                conversationId: currentConversationId,
+
+        const { conversationId, userId } = req.body;
+
+        await db
+            .collection("conversations")
+            .doc(conversationId)
+            .update({
+                userId,
+                updatedAt: new Date(),
             });
-    }
-        catch (error) {
+
+        res.json({
+            success: true,
+        });
+
+    } catch (error) {
+
         console.error(error);
+
         res.status(500).json({
             error: "Something went wrong.",
         });
+
     }
+
 });
 module.exports = router;
