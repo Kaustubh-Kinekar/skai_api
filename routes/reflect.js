@@ -87,9 +87,23 @@ try{
                 res.status(500).json({
                     error: "Something went wrong.",
                 });
-
-            }
-
+        }
 });
+router.post("/saveGuestConversation", async (req, res) => {
+    try {
 
+        const { userId, messages } = req.body;
+
+        console.log("Saving guest conversation...");
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            error: "Something went wrong.",
+        });
+
+    }
+});
 module.exports = router;
