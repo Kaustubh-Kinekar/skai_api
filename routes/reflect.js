@@ -84,8 +84,6 @@ try{
         }
 });
 
-router.post("/claimConversation", async (req, res) => {
-
     try {
 
         const { conversationId, userId } = req.body;
