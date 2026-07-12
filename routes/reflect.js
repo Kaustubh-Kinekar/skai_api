@@ -1,4 +1,4 @@
-const { reflect } = require("../services/gemini");
+const { reflect } = require("../services/angel");
 const { maybeUpdateProfile } = require("../services/userMemory");
 const db = require("../config/firebase");
 const express = require("express");
@@ -9,7 +9,7 @@ const HISTORY_LIMIT = 20; // last N messages sent to Gemini as context
 
 router.post("/", async (req, res) => {
     try {
-        const { conversationId, userId, message } = req.body;
+        const { conversationId, userId, message, persona } = req.body;
 
         if (!message || !message.trim()) {
             return res.status(400).json({ error: "Message is required." });
@@ -63,7 +63,8 @@ router.post("/", async (req, res) => {
                     }
                 }
 
-        const result = await reflect(message, isNewConversation, history, userProfile, demographics);
+        const geminiModule = persona === "skai" ? require("../services/skai") : require("../services/angel");
+        const result = await geminiModule.reflect(message, isNewConversation, history, userProfile, demographics);
 
         if (isNewConversation) {
             await db.collection("conversations").doc(currentConversationId).update({
