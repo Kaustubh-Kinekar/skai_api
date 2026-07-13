@@ -25,7 +25,11 @@ Return ONLY valid JSON in this exact shape:
 }
 `;
 
-async function maybeUpdateProfile(userId, conversationId) {
+async function maybeUpdateProfile(userId, conversationId, wasSuccessfulMessage = true) {
+if (!wasSuccessfulMessage) {
+        console.log(`Skipping profile count for ${userId} — message failed`);
+        return;
+    }
     const userRef = db.collection("users").doc(userId);
     const userDoc = await userRef.get();
     const existing = userDoc.exists ? userDoc.data() : {};

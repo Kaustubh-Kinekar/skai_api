@@ -99,7 +99,7 @@ router.post("/", async (req, res) => {
         // Fire-and-forget: update the user's long-term profile in the background.
         // Doesn't block the response, doesn't affect this reply.
         if (userId) {
-            maybeUpdateProfile(userId, currentConversationId).catch((err) =>
+            maybeUpdateProfile(userId, currentConversationId, !result.failed).catch((err) =>
                 console.error("Profile update failed:", err)
             );
         }

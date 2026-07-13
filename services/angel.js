@@ -192,6 +192,7 @@ async function reflect(
             response:
                 "I'm having trouble responding right now. If you're going through something difficult, please don't wait on me — reach out to someone you trust or a crisis line.",
             mode: "grounding",
+            failed: true,
         };
     }
 
