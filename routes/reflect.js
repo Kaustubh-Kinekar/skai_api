@@ -21,10 +21,19 @@ router.post("/", async (req, res) => {
         if (!currentConversationId) {
             const conversationRef = await db.collection("conversations").add({
                 userId: userId || null,
+                persona: persona || "angel",
                 createdAt: new Date(),
                 updatedAt: new Date(),
             });
             currentConversationId = conversationRef.id;
+        }
+
+        let effectivePersona = persona || "angel";
+        if (!isNewConversation) {
+            const convoDoc = await db.collection("conversations").doc(currentConversationId).get();
+            if (convoDoc.exists && convoDoc.data().persona) {
+                effectivePersona = convoDoc.data().persona;
+            }
         }
 
         // --- fetch prior messages for context (empty array if new) ---
@@ -63,7 +72,7 @@ router.post("/", async (req, res) => {
                     }
                 }
 
-        const geminiModule = persona === "skai" ? require("../services/skai") : require("../services/angel");
+        const geminiModule = effectivePersona === "skai" ? require("../services/skai") : require("../services/angel");
         const result = await geminiModule.reflect(message, isNewConversation, history, userProfile, demographics);
 
         if (isNewConversation) {
