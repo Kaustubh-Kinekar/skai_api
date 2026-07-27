@@ -1,4 +1,3 @@
-const { reflect } = require("../services/angel");
 const { maybeUpdateProfile } = require("../services/userMemory");
 const db = require("../config/firebase");
 const express = require("express");
@@ -72,8 +71,30 @@ router.post("/", async (req, res) => {
                     }
                 }
 
-        const geminiModule = effectivePersona === "skai" ? require("../services/skai") : require("../services/angel");
-        const result = await geminiModule.reflect(message, isNewConversation, history, userProfile, demographics);
+        let geminiModule;
+
+        switch ((effectivePersona || "").toLowerCase()) {
+            case "skai":
+                geminiModule = require("../services/skai");
+                break;
+
+            case "angel":
+                geminiModule = require("../services/angel");
+                break;
+
+            default:
+                return res.status(400).json({
+                    error: `Unknown persona: ${effectivePersona}`,
+                });
+        }
+
+        const result = await geminiModule.reflect(
+            message,
+            isNewConversation,
+            history,
+            userProfile,
+            demographics
+        );
 
         if (isNewConversation) {
             await db.collection("conversations").doc(currentConversationId).update({
