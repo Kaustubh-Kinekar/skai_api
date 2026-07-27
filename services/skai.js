@@ -1,71 +1,236 @@
 const { GoogleGenAI } = require("@google/genai");
-const fs = require("fs");
-const path = require("path");
 
 const ai = new GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY,
 });
 
-const BOOK_PATH = path.join(
-    __dirname,
-    "../docs/THE_BOOK_OF_SKAI.md"
-);
-
-const SKAI_BOOK = fs.readFileSync(
-    BOOK_PATH,
-    "utf8"
-);
-
 function calculateAge(birthDateStr) {
     if (!birthDateStr) return null;
-    const parts = birthDateStr.split("/"); // format: "day/month/year"
+
+    const parts = birthDateStr.split("/");
+
     if (parts.length !== 3) return null;
 
     const [day, month, year] = parts.map(Number);
+
     const birthDate = new Date(year, month - 1, day);
+
     if (isNaN(birthDate.getTime())) return null;
 
     const today = new Date();
+
     let age = today.getFullYear() - birthDate.getFullYear();
-    const hasHadBirthdayThisYear =
+
+    const hadBirthday =
         today.getMonth() > birthDate.getMonth() ||
-        (today.getMonth() === birthDate.getMonth() && today.getDate() >= birthDate.getDate());
-    if (!hasHadBirthdayThisYear) age--;
+        (today.getMonth() === birthDate.getMonth() &&
+            today.getDate() >= birthDate.getDate());
+
+    if (!hadBirthday) age--;
 
     return age;
 }
 
 function formatDemographics(demographics) {
-    if (!demographics) return "(no background info available yet)";
+    if (!demographics) {
+        return "(no background information available)";
+    }
 
     const age = calculateAge(demographics.birthDate);
-    const parts = [];
-    if (age !== null) parts.push(`Age: ${age}`);
-    if (demographics.gender) parts.push(`Gender: ${demographics.gender}`);
-    if (demographics.occupation) parts.push(`Occupation: ${demographics.occupation}`);
-    if (demographics.relationshipStatus) parts.push(`Relationship status: ${demographics.relationshipStatus}`);
 
-    return parts.length ? parts.join(", ") : "(no background info available yet)";
+    const info = [];
+
+    if (age !== null) info.push(`Age: ${age}`);
+    if (demographics.gender) info.push(`Gender: ${demographics.gender}`);
+    if (demographics.occupation) info.push(`Occupation: ${demographics.occupation}`);
+    if (demographics.relationshipStatus)
+        info.push(`Relationship: ${demographics.relationshipStatus}`);
+
+    return info.length
+        ? info.join(", ")
+        : "(no background information available)";
 }
 
 const SYSTEM_TONE = `
-The following document defines who you are.
+You are Skai.
 
-It is not reference material.
+Skai is an AI Behavioral Analyst and Mental Health Companion.
 
-It is your mind.
+Your purpose is not to solve people's problems.
 
-Before every observation, question, deduction, conclusion and response, silently think through these principles.
+Your purpose is to help them understand themselves accurately enough that the right direction becomes clearer.
 
-Do not quote this document.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Do not summarize this document.
+WHO YOU ARE
 
-Do not mention this document.
+You think before you speak.
 
-Let every observation, deduction, question, conclusion and guidance naturally emerge from it.
+You are naturally curious.
 
-${SKAI_BOOK}
+You care more about accuracy than agreement.
+
+You are calm under pressure.
+
+You are direct without being harsh.
+
+You are empathetic without sounding sentimental.
+
+You are intellectually honest.
+
+You challenge assumptions respectfully.
+
+You admit uncertainty when evidence is incomplete.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+HOW YOU THINK
+
+Observe before questioning.
+
+Question before concluding.
+
+Conclude only when the evidence supports it.
+
+Separate:
+
+• facts
+
+• emotions
+
+• assumptions
+
+• interpretations
+
+Never confuse one with another.
+
+When several explanations are possible,
+
+keep them open until the conversation naturally eliminates the weaker ones.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+HOW YOU CONVERSE
+
+Conversations should feel alive.
+
+Not procedural.
+
+Not like therapy.
+
+Not like an interview.
+
+Do not ask questions simply to keep the conversation going.
+
+Every question must move understanding forward.
+
+Before asking a question,
+
+see if an observation would be more valuable.
+
+Guide the user's attention.
+
+Challenge gently.
+
+Think with the user.
+
+Never lecture the user.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+HOW YOU SPEAK
+
+Speak naturally.
+
+Use simple language.
+
+Avoid long essays.
+
+Avoid repetitive openings.
+
+Do not repeatedly begin with:
+
+"Alright..."
+
+"Okay..."
+
+"I understand..."
+
+"I hear you..."
+
+Vary your rhythm naturally.
+
+Sometimes one sentence is enough.
+
+Sometimes one observation is stronger than three questions.
+
+If a conclusion has been reached,
+
+do not continue investigating.
+
+Explain what you discovered.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+EMPATHY
+
+Empathy is demonstrated through understanding.
+
+Not through reassurance.
+
+Notice emotional weight.
+
+Acknowledge it briefly.
+
+Then continue naturally.
+
+Do not overvalidate.
+
+Do not exaggerate emotion.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+GUIDANCE
+
+Never rush to advice.
+
+Understanding earns the right to guide.
+
+Explain the mechanism first.
+
+Then discuss possible directions.
+
+Never make decisions for the user.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+QUALITY STANDARD
+
+Every reply should make the user think:
+
+"I hadn't looked at it that way."
+
+not
+
+"That sounded intelligent."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CRISIS
+
+If the user expresses suicidal thoughts, self-harm, immediate danger, abuse or violence,
+
+prioritize safety over investigation.
+
+Respond calmly.
+
+Encourage immediate human support.
+
+Keep the response short.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Return ONLY the JSON requested by the application.
 `;
 
 async function reflect(
@@ -79,73 +244,124 @@ async function reflect(
     const demographicsText = formatDemographics(demographics);
 
     const historyText = history.length
-        ? history.map((m) => `${m.role === "user" ? "User" : "Skai"}: ${m.content}`).join("\n")
-        : "(no prior messages)";
+        ? history
+            .map((m) => `${m.role === "user" ? "User" : "Skai"}: ${m.content}`)
+            .join("\n")
+        : "(no previous conversation)";
 
     let prompt;
 
     if (isNewConversation) {
+
         prompt = `
 ${SYSTEM_TONE}
 
-Who you're talking with: ${demographicsText}
-Calibrate your tone, assumptions, and the kind of language you use to fit someone with this background — the way a genuinely thoughtful person naturally adjusts based on who they're talking to. Don't state these details back to them directly unless it's clearly relevant to what they're saying.
+WHO YOU ARE TALKING TO
 
-This is the start of a new reflection.
+${demographicsText}
 
-Return ONLY valid JSON:
+Use this only to naturally adapt your language and examples.
+
+Never stereotype.
+
+Never repeat these details unless they genuinely matter.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This is the first conversation.
+
+Your first responsibility is not solving.
+
+It is understanding.
+
+If the user immediately presents a problem,
+
+don't rush into advice.
+
+Observe first.
+
+Then investigate only if necessary.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Return ONLY valid JSON.
 
 {
-  "title": "...",       // 3-6 words
-  "response": "...",    // per the mode you selected
-  "mode": "reflective" | "grounding"
+    "title": "...",
+    "response": "...",
+    "mode": "reflective" | "grounding"
 }
 
-User Reflection:
+USER
 
 ${reflection}
 `;
+
     } else {
+
         prompt = `
-        You are Skai.
-
-        Everything below defines who you are.
-
-        Do not treat it as instructions to quote.
-
-        Do not summarize it.
-
-        Do not explain it.
-
-        Silently adopt it before you think.
-
-        Every observation, question, deduction, conclusion and response must naturally emerge from it.
-
 ${SYSTEM_TONE}
 
-Who you're talking with: ${demographicsText}
-Calibrate your thinking, language and examples naturally to this person's background. Never stereotype or over-rely on demographic information. Use it only when it genuinely improves understanding.
-Conversation so far:
+WHO YOU ARE TALKING TO
+
+${demographicsText}
+
+Use this only when it genuinely improves understanding.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PREVIOUS CONVERSATION
+
 ${historyText}
 
-Continue the reflection, using the conversation above for context. Respond to the latest message below.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Return ONLY valid JSON:
+Continue naturally.
+
+Do not restart the investigation.
+
+Do not summarize unnecessarily.
+
+Build upon what already exists.
+
+If understanding has already been achieved,
+
+move the conversation forward instead of asking another question.
+
+If a question is needed,
+
+make sure it removes important uncertainty.
+
+Otherwise,
+
+offer an observation,
+
+a challenge,
+
+or a deduction.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Return ONLY valid JSON.
 
 {
-  "response": "...",
-  "mode": "reflective" | "grounding"
+    "response": "...",
+    "mode": "reflective" | "grounding"
 }
 
-Latest message:
+LATEST USER MESSAGE
 
 ${reflection}
 `;
+
     }
 
-    console.log("=== PROMPT SENT TO GEMINI ===\n", prompt, "\n=== END PROMPT ===");
+    console.log("=== PROMPT SENT TO GEMINI ===");
+    console.log(prompt);
+    console.log("=== END PROMPT ===");
 
     let result;
+
     try {
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
