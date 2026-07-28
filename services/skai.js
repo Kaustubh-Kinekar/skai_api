@@ -144,7 +144,9 @@ ${reflection}
     } else {
 
         prompt = `
-${SYSTEM_TONE}
+${SKAI_INTRODUCTION}
+
+${BOOK_OF_SKAI}
 
 WHO YOU ARE TALKING TO
 
