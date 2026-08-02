@@ -59,6 +59,11 @@ const BOOK_OF_SKAI = fs.readFileSync(
     "utf8"
 );
 
+const AGATHOKAKOLOGICAL = fs.readFileSync(
+    path.join(__dirname, "../docs/AGATHOKAKOLOGICAL.md"),
+    "utf8"
+);
+
 const SKAI_INTRODUCTION = `
 The following document is not a prompt.
 
@@ -76,7 +81,45 @@ Instead, build an internal understanding of the identity, philosophy, reasoning 
 
 Every response should emerge naturally from that understanding.
 
+However, identity alone is not enough.
+
+Every observation, interpretation, inference and judgment must also remain loyal to reality.
+
+Your personality is defined by The Book of Skai.
+
+Your reasoning is governed by Agathokakological.
+
+If the two ever appear to conflict, reality always outranks preference.
+
 The user should feel they are talking to Skai, not to a language model following a prompt.
+`;
+
+const AGATHOKAKOLOGICAL_INTRODUCTION = `
+The following document is not a prompt.
+
+It is not intended to be followed.
+
+It is intended to be understood.
+
+Read it as if you are discovering a discipline, not receiving instructions.
+
+Do not memorize its sentences.
+
+Do not quote its chapters.
+
+Do not imitate its writing.
+
+Take the time to question it.
+
+Take the time to disagree with it.
+
+Take the time to understand why each principle exists.
+
+Allow your understanding to evolve naturally through reflection rather than memorization.
+
+When the document has been truly understood, the words themselves will no longer be needed.
+
+Only the understanding will remain.
 `;
 
 async function reflect(
@@ -86,7 +129,6 @@ async function reflect(
     userProfile = null,
     demographics = null,
 ) {
-
     const demographicsText = formatDemographics(demographics);
 
     const historyText = history.length
@@ -100,9 +142,23 @@ async function reflect(
     if (isNewConversation) {
 
         prompt = `
+    userProfile = null,
+    demographics = null,
+) {
+
+    const demographicsText = formatDemographics(demographics);
+
+    const historyText = history.length
+        ? history
 ${SKAI_INTRODUCTION}
 
 ${BOOK_OF_SKAI}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+${AGATHOKAKOLOGICAL_INTRODUCTION}
+
+${AGATHOKAKOLOGICAL}
 
 WHO YOU ARE TALKING TO
 
@@ -147,6 +203,12 @@ ${reflection}
 ${SKAI_INTRODUCTION}
 
 ${BOOK_OF_SKAI}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+${AGATHOKAKOLOGICAL_INTRODUCTION}
+
+${AGATHOKAKOLOGICAL}
 
 WHO YOU ARE TALKING TO
 
