@@ -1,4 +1,6 @@
 const { GoogleGenAI } = require("@google/genai");
+const fs = require("fs");
+const path = require("path");
 
 const ai = new GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY,
@@ -50,9 +52,6 @@ function formatDemographics(demographics) {
         ? info.join(", ")
         : "(no background information available)";
 }
-
-const fs = require("fs");
-const path = require("path");
 
 const BOOK_OF_SKAI = fs.readFileSync(
     path.join(__dirname, "../docs/THE_BOOK_OF_SKAI.md"),
@@ -140,16 +139,7 @@ async function reflect(
     let prompt;
 
     if (isNewConversation) {
-
         prompt = `
-    userProfile = null,
-    demographics = null,
-) {
-
-    const demographicsText = formatDemographics(demographics);
-
-    const historyText = history.length
-        ? history
 ${SKAI_INTRODUCTION}
 
 ${BOOK_OF_SKAI}
@@ -196,9 +186,7 @@ USER
 
 ${reflection}
 `;
-
     } else {
-
         prompt = `
 ${SKAI_INTRODUCTION}
 
@@ -247,7 +235,6 @@ LATEST USER MESSAGE
 
 ${reflection}
 `;
-
     }
 
     console.log("=== PROMPT SENT TO GEMINI ===");
@@ -263,6 +250,7 @@ ${reflection}
         });
 
         console.log(response.text);
+
         const cleaned = response.text
             .replace(/```json/g, "")
             .replace(/```/g, "")
@@ -274,7 +262,7 @@ ${reflection}
         result = {
             title: "Reflection",
             response:
-            "I’m having trouble responding right now. I don’t want to guess or give you a careless answer. If what you’re dealing with is urgent or you're in immediate danger, please reach out to someone you trust or a crisis service while I’m unavailable.",
+                "I'm having trouble responding right now. I don't want to guess or give you a careless answer. If what you're dealing with is urgent or you're in immediate danger, please reach out to someone you trust or a crisis service while I'm unavailable.",
             mode: "grounding",
             failed: true,
         };
